@@ -1,2 +1,3 @@
-# javascript-final-assignment
+# JavaScript final assignment - Flappy Bird Extreme
+
  
