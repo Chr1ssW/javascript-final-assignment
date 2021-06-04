@@ -33,7 +33,7 @@ The mistery boxes can include the following:
 
 ## Class diagram
 
-![Class diagram](c-drm.png?raw=true "Title")
+![Class diagram](c-drm.png?raw=true "Class diagram")
 
 ## Set up
 
