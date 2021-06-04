@@ -5,7 +5,8 @@
 |     Changes     |   Date   |
 |-----------------| -------- |
 | Initial commit, `Hello-world` app                | 26/05/21 |
-| Updated start document, basic flappy bird added  | 03/06/21 |
+| Added structure to document, added description   | 03/06/21 |
+| Added class diagram                              | 04/06/21 |
 
 ## Description
 
@@ -32,11 +33,18 @@ The mistery boxes can include the following:
 
 ## Class diagram
 
-Good luck with that
+![Class diagram](c-drm.png?raw=true "Title")
 
 ## Set up
 
 To set up the game the user needs a local server. This is preferably `Xampp`, but it should work with any other localhost. The user must place the files on the local server and open the `index.html` through the browser.
+
+## Controls
+
+The game has only two controls:
+
+1. `left-click` on the mouse will make the bird ascend
+2. `space` will shoot if the user has ammo
 
 ## References
 
