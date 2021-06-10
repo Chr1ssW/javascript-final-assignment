@@ -6,7 +6,7 @@ class Pickups
     constructor(scene)
     {
         this.#_pickupGroup = scene.physics.add.group();
-        this.#_pickupStore.push(this.#_pickupGroup.create(0, 0, 'bird'));
+        this.#_pickupStore.push(this.#_pickupGroup.create(450, Phaser.Math.Between(20, game.config.height - 20), 'pickup'));
     }
 
     get pickupGroup()
@@ -28,11 +28,10 @@ class Pickups
     {
         let doIt = Phaser.Math.Between(0, 10);
         if (doIt == 1) {
-            this.#_pickupStore[0].x = this.getLastPickup() + pos;
-            this.#_pickupStore[0].y = Phaser.Math.Between(10, game.config.height - 10);
+            this.#_pickupStore[0].x = 350 * Phaser.Math.Between(1, 3);
+            this.#_pickupStore[0].y = Phaser.Math.Between(20, game.config.height - 20);
             this.#_pickupStore[0].setOrigin(0, 1);
             this.#_pickupStore = [];
-            console.log("rendered");
         }
     }
 
@@ -48,14 +47,12 @@ class Pickups
     generatePickupType()
     {
         let pickupTypes = [
-            "Health",
-            "Mirror",
-            "Fast",
             "Slow",
-            "Moving",
-            "Ammo"];
+            "Fast",
+            "Health",
+            "Health"];
 
-        let random = Phaser.Math.Between(0, pickupTypes.length);
+        let random = Phaser.Math.Between(0, pickupTypes.length - 1);
 
         return pickupTypes[random];
     }

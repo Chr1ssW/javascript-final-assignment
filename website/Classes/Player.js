@@ -9,6 +9,9 @@ class Player extends Phaser.Physics.Arcade.Sprite
     //determines how high the bird flies with each click
     #_playerFlapPower = 300;
 
+    //players health
+    #_playerInvincible = false;
+
     //Creates a new player object and places it on the screen
     //game - the scene where the object should appear
     //x, y - coordinates of the object within the scene
@@ -20,6 +23,16 @@ class Player extends Phaser.Physics.Arcade.Sprite
         game.physics.add.existing(this);
         
         this.body.gravity.y = this.#_playerGravity;
+    }
+
+    set PlayerInvincible(value)
+    {        
+        this.#_playerInvincible = value;        
+    }
+
+    get PlayerInvincible()
+    {
+        return this.#_playerInvincible;
     }
 
     set playerGravity(value)

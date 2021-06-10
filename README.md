@@ -24,11 +24,11 @@ This version contains some extras that make the gameplay more interesting than j
 
 The mistery boxes can include the following:
 
-- __Slow time__ makes the obstacles appear slower therefore the player has more time to navigate through them (_10 seconds_)
+- __Slow time__ makes the obstacles appear slower therefore the player has more time to navigate through them (_6 seconds_)
 - __Accelerate time__ makes the obstacles appear faster therefore the player has less time to navigate thus increases the chance of losing (_10 seconds_)
 - __Ammo__ can be used to shoot the obstacles. All obstacles can be shot but it is smart for the user to reserve his ammo because walls __without a gap__ can also spawn
 - __Moving obstacles__ will make the obstacles move up and down therefore it is more difficult to navigate through the gap (_15 seconds_)
-- __Extra life__ lets the user continue playing if he died
+- __Invincibility__ lets the user walk through walls once
 - __Mirror__ will change the course of the gameplay and make the user go left (_10 seconds_)
 
 ## Class diagram
