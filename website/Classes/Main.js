@@ -26,9 +26,7 @@ class Main extends Phaser.Scene {
     create() {
 
         this.thisField;
-
-        
-
+      
         //Adding pipes
         this.upperPipes = this.physics.add.group();
         this.lowerPipes = this.physics.add.group();
@@ -46,6 +44,7 @@ class Main extends Phaser.Scene {
         //Creating the bird
         this.bird = new Player(this, 80, game.config.height / 2, 'bird');
 
+        //Being updated needs to be preserved
         this.pipeVelocity = this.bird.playerSpeed;
 
         //Creating pickups
@@ -279,7 +278,7 @@ class Main extends Phaser.Scene {
             that.upperPipes.setVelocityX(- (that.bird.playerSpeed));
             that.lowerPipes.setVelocityX(- (that.bird.playerSpeed));
             that.pipeVelocity = (that.bird.playerSpeed);
-            
+
             that.pickups.setSpeed(that.bird.playerSpeed);
         }, 6000);
     }
