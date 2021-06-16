@@ -18,9 +18,7 @@ class Main extends Phaser.Scene {
         this.load.image('background', 'resources/background.png');
         this.load.image('ammo', 'resources/ammo.png');
         this.load.image('noAmmo', 'resources/noAmmo.png');
-        this.load.image('fireball', 'resources/fireball.png');
-
-       
+        this.load.image('fireball', 'resources/fireball.png');       
     }
 
     //Initializes the assets in the game
@@ -28,6 +26,8 @@ class Main extends Phaser.Scene {
     create() {
 
         this.thisField;
+
+        
 
         //Adding pipes
         this.upperPipes = this.physics.add.group();
@@ -45,6 +45,8 @@ class Main extends Phaser.Scene {
 
         //Creating the bird
         this.bird = new Player(this, 80, game.config.height / 2, 'bird');
+
+        this.pipeVelocity = this.bird.playerSpeed;
 
         //Creating pickups
         this.pickups = new Pickups(this);
@@ -119,10 +121,11 @@ class Main extends Phaser.Scene {
     placePipe(skin, y){     
         if (skin === 'upperPipe'){
             this.upperPipes.create(500, y, skin);
-            this.upperPipes.setVelocityX(- (this.bird.playerSpeed));
+            this.upperPipes.setVelocityX(- (this.pipeVelocity));
         }else{
             this.lowerPipes.create(500, y, skin);
-            this.lowerPipes.setVelocityX(-(this.bird.playerSpeed)); 
+            this.lowerPipes.setVelocityX(-(this.pipeVelocity)); 
+            console.log(this.pipeVelocity);
         }
     }
 
@@ -262,25 +265,33 @@ class Main extends Phaser.Scene {
 
     //Slows the game
     slowGame() {
-        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) - 45);
-        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) - 45);
+        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) + 45);
+        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) + 45);
         this.pickups.setSpeed((this.bird.playerSpeed) - 45);
+
+        this.pipeVelocity = (this.bird.playerSpeed) - 45;
         
         //Resets the speed to normal
         //setTimeout 'this.'' is not the same as Main 'this.'
         //Therefore have to save it in a variable and use that
         var that = this;
         setTimeout(function () {
-            that.pipes.setSpeed(that.bird.playerSpeed);
+            that.upperPipes.setVelocityX(- (that.bird.playerSpeed));
+            that.lowerPipes.setVelocityX(- (that.bird.playerSpeed));
+            that.pipeVelocity = (that.bird.playerSpeed);
+            
             that.pickups.setSpeed(that.bird.playerSpeed);
         }, 6000);
     }
 
     //Fastens the game
     fastenGame() {
-        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) + 100);
-        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) + 100);
+        console.log("hello");
+        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) - 100);
+        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) - 100);
         this.pickups.setSpeed((this.bird.playerSpeed) + 100);
+
+        this.pipeVelocity = (this.bird.playerSpeed) + 100;
 
         var that = this;
 
@@ -289,7 +300,10 @@ class Main extends Phaser.Scene {
         //Therefore have to save it in a variable and use that
         var that = this;
         setTimeout(function () {
-            that.pipes.setSpeed(that.bird.playerSpeed);
+            that.upperPipes.setVelocityX(- (that.bird.playerSpeed));
+            that.lowerPipes.setVelocityX(- (that.bird.playerSpeed));
+            that.pipeVelocity = (that.bird.playerSpeed);
+
             that.pickups.setSpeed(that.bird.playerSpeed);
         }, 6000);
     }
