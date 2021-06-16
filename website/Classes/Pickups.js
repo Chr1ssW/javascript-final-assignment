@@ -47,8 +47,8 @@ class Pickups
     generatePickupType()
     {
         let pickupTypes = [
-            "Slow",
-            "Fast",
+            "Health",
+            "Health",
             "Health",
             "Health"];
 

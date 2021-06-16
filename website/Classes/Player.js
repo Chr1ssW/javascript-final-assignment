@@ -12,6 +12,9 @@ class Player extends Phaser.Physics.Arcade.Sprite
     //players health
     #_playerInvincible = false;
 
+    //player ammo
+    #_playerAmmo = 10;
+
     //Creates a new player object and places it on the screen
     //game - the scene where the object should appear
     //x, y - coordinates of the object within the scene
@@ -33,6 +36,16 @@ class Player extends Phaser.Physics.Arcade.Sprite
     get PlayerInvincible()
     {
         return this.#_playerInvincible;
+    }
+
+    set PlayerAmmo(value)
+    {        
+        this.#_playerAmmo = value;        
+    }
+
+    get PlayerAmmo()
+    {
+        return this.#_playerAmmo;
     }
 
     set playerGravity(value)

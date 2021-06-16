@@ -55,9 +55,7 @@ class Pipes
         this.#_pipePool[1].x = this.#_pipePool[0].x;
         this.#_pipePool[1].y = pipeHolePosition + pipeHoleHeight / 2;
         this.#_pipePool[1].setOrigin(0, 0);
-        this.#_pipePool = [];
-
-        
+        this.#_pipePool = [];        
     }
 
     getRightmostPipe()
@@ -74,7 +72,6 @@ class Pipes
     {
         this.#_pipeGroup.setVelocityX(- (speed));
     }
-
     
     addPipe(pipe)
     {
