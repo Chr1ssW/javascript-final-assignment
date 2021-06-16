@@ -7,6 +7,7 @@
 | Initial commit, `Hello-world` app                | 26/05/21 |
 | Added structure to document, added description   | 03/06/21 |
 | Added class diagram                              | 04/06/21 |
+| Updated class diagram                            | 16/06/21 |
 
 ## Description
 
