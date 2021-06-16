@@ -4,7 +4,7 @@ class Player extends Phaser.Physics.Arcade.Sprite
     #_playerGravity = 800;
 
     //determines how fast the bird moves horizontally
-    #_playerSpeed = 125;
+    #_playerSpeed = 150;
 
     //determines how high the bird flies with each click
     #_playerFlapPower = 300;

@@ -6,24 +6,32 @@ var gameOptions = {
 class Main extends Phaser.Scene {
     constructor() {
         super('PlayGame');
-
     }
 
     //Loading the assets used in the game
     preload() {
         this.load.image('bird', 'resources/angry-bird.png');
         this.load.image('invincibleBird', 'resources/invincible-bird.png');
-        this.load.image('pipe', 'resources/pipe.png');
+        this.load.image('upperPipe', 'resources/topPipe.png');
+        this.load.image('bottomPipe', 'resources/bottomPipe.png');
         this.load.image('pickup', 'resources/pickup.png');
         this.load.image('background', 'resources/background.png');
         this.load.image('ammo', 'resources/ammo.png');
         this.load.image('noAmmo', 'resources/noAmmo.png');
         this.load.image('fireball', 'resources/fireball.png');
+
+       
     }
 
     //Initializes the assets in the game
     //And places them on the canvas
     create() {
+
+        this.thisField;
+
+        //Adding pipes
+        this.upperPipes = this.physics.add.group();
+        this.lowerPipes = this.physics.add.group();
 
         //Setting the background
         this.add.image(160, 240, 'background');
@@ -41,10 +49,6 @@ class Main extends Phaser.Scene {
         //Creating pickups
         this.pickups = new Pickups(this);
         this.pickups.setSpeed(this.bird.playerSpeed);
-
-        //Creating pipes
-        this.pipes = new Pipes(this);
-        this.pipes.setSpeed(this.bird.playerSpeed);
 
         //Adding fireballs
         this.fireballs = new FireballGroup(this);
@@ -68,6 +72,58 @@ class Main extends Phaser.Scene {
         //Ammo counter
         this.ammoText = this.add.text(30, 70, '');
         this.updateAmmo();
+
+        //Spawn pipes
+        this.spawnPipes();
+    }
+
+    //Timer that spawns the pipes
+    spawnPipes(){
+        this.thisField = this.time.addEvent({
+            delay: 1500,
+            callback: this.generatePipes,
+            callbackScope: this,
+            loop: true
+        });
+    }
+
+    //Generates the pipes
+    generatePipes(){
+            //Randomly picking the size of the gap
+            let gap = Phaser.Math.Between(90, 120);
+
+            //Selecting a random number between 1 and 6
+            //If it is 1 then the gap will be 0 and the player has to shoot
+            //Only spawns if user has ammo
+            let fate = Phaser.Math.Between(1, 6);
+            if (fate == 1 && this.bird.PlayerAmmo > 0){
+                gap = 0;
+            }
+
+            //Minimum distance has to be at least 320
+            let distance = 320 + gap;
+
+            //Picking the hole position
+            //This is the middle of the gap
+            let pipeHolePosition = Phaser.Math.Between(130, 330);
+
+
+            let lowerY = pipeHolePosition + distance / 2;
+            let upperY = pipeHolePosition - distance / 2;
+
+            this.placePipe('upperPipe', upperY);
+            this.placePipe('bottomPipe', lowerY);
+    }
+
+    //Places the pipes on the screen
+    placePipe(skin, y){     
+        if (skin === 'upperPipe'){
+            this.upperPipes.create(500, y, skin);
+            this.upperPipes.setVelocityX(- (this.bird.playerSpeed));
+        }else{
+            this.lowerPipes.create(500, y, skin);
+            this.lowerPipes.setVelocityX(-(this.bird.playerSpeed)); 
+        }
     }
 
     //Can't delete it for now have to figure out why
@@ -108,7 +164,11 @@ class Main extends Phaser.Scene {
         });
 
         //Collider for bird and pipes
-        this.physics.world.overlap(this.bird, this.pipes.pipeGroup, function () {
+        this.physics.world.overlap(this.bird, this.upperPipes, function () {
+            this.die();
+        }, null, this);
+        //Collider for bird and pipes
+        this.physics.world.overlap(this.bird, this.lowerPipes, function () {
             this.die();
         }, null, this);
 
@@ -116,26 +176,16 @@ class Main extends Phaser.Scene {
         this.physics.world.overlap(this.bird, this.pickups.pickupGroup, this.pickupObjects, null, this);
 
         //Collider for fireballs and pipes
-        this.physics.world.overlap(this.fireballs, this.pipes.pipeGroup, this.shootPipes , null, this);
+        this.physics.world.overlap(this.fireballs, this.upperPipes, this.shootPipes, null, this);
+        
+        //Collider for fireballs and pipes
+        this.physics.world.overlap(this.fireballs, this.lowerPipes, this.shootPipes, null, this);
 
         //If the player leaves the screen the bird dies
         if (this.bird.y > game.config.height || this.bird.y < 0) {
             this.die();
         }
-
-        //Clean this up
-        this.pipes.pipeGroup.getChildren().forEach(function (pipe) {
-            if (pipe.getBounds().right < 0) {
-                this.pipes.addPipe(pipe);
-
-                if (this.pipes.pipePool.length == 2) {
-                    this.pipes.placePipes();
-
-                    this.updateScore(1);
-                }
-            }
-        }, this)
-
+        
         //Iterate through the pickups to check if they are out of the screen
         this.pickups.pickupGroup.getChildren().forEach(function (pickup) {
             this.pickups.addPickup(pickup);
@@ -143,7 +193,7 @@ class Main extends Phaser.Scene {
             if (pickup.getBounds().right < 0) {
 
                 //If pickup is out of the screen render a new one
-                this.pickups.renderPickups(this.pipes.pipeXPosition);
+                this.pickups.renderPickups(250);
             }
         }, this)
     }
@@ -164,12 +214,11 @@ class Main extends Phaser.Scene {
     }
 
     shootPipes(ammo, pipe) {
-        console.log('Triggered');
-        pipe.disableBody(true, true);     
+        console.log('hitPipe');
+        pipe.destroy();   
         ammo.disableBody(true, true);    
-        ammo.enableBody(true, 500,500, true, true);
+        ammo.enableBody(true, 1500,1500, true, true);
     }
-
     //End and restart the game
     die() {
 
@@ -213,7 +262,8 @@ class Main extends Phaser.Scene {
 
     //Slows the game
     slowGame() {
-        this.pipes.setSpeed((this.bird.playerSpeed) - 45);
+        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) - 45);
+        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) - 45);
         this.pickups.setSpeed((this.bird.playerSpeed) - 45);
         
         //Resets the speed to normal
@@ -228,7 +278,8 @@ class Main extends Phaser.Scene {
 
     //Fastens the game
     fastenGame() {
-        this.pipes.setSpeed((this.bird.playerSpeed) + 100);
+        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) + 100);
+        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) + 100);
         this.pickups.setSpeed((this.bird.playerSpeed) + 100);
 
         var that = this;
@@ -254,7 +305,7 @@ class Main extends Phaser.Scene {
     //Mirror game
     //Not yet functional
     mirrorGame() {
-        this.pipes.setSpeed(-(this.bird.playerSpeed));
+        //this.pipes.setSpeed(-(this.bird.playerSpeed));
 
         //Resets the speed to normal
         //setTimeout 'this.'' is not the same as Main 'this.'
