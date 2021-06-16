@@ -46,6 +46,8 @@ class Main extends Phaser.Scene {
 
         //Being updated needs to be preserved
         this.pipeVelocity = this.bird.playerSpeed;
+        //If true pipes move
+        this.isMoving = false;
 
         //Creating pickups
         this.pickups = new Pickups(this);
@@ -95,9 +97,9 @@ class Main extends Phaser.Scene {
 
             //Selecting a random number between 1 and 6
             //If it is 1 then the gap will be 0 and the player has to shoot
-            //Only spawns if user has ammo
-            let fate = Phaser.Math.Between(1, 6);
-            if (fate == 1 && this.bird.PlayerAmmo > 0){
+            //Doesn't spawn if user has no ammo
+            let fate = Phaser.Math.Between(1, 10);
+            if (fate == 1 && this.bird.ammo > 0){
                 gap = 0;
             }
 
@@ -114,6 +116,20 @@ class Main extends Phaser.Scene {
 
             this.placePipe('upperPipe', upperY);
             this.placePipe('bottomPipe', lowerY);
+
+            //Need to check both the get points if the user destroys one of them
+            var upperFirst = this.upperPipes.getFirstAlive();
+            var lowerFirst = this.lowerPipes.getFirstAlive();
+            if (upperFirst != null || lowerFirst != null)
+            {
+                //If the user passes the pipes increase the score
+                //If the user shoots both pipes no score is given
+                if (upperFirst.x < this.bird.x || lowerFirst.x < this.bird)
+                {
+                    this.updateScore(1);
+                }
+            }
+            
     }
 
     //Places the pipes on the screen
@@ -123,8 +139,22 @@ class Main extends Phaser.Scene {
             this.upperPipes.setVelocityX(- (this.pipeVelocity));
         }else{
             this.lowerPipes.create(500, y, skin);
-            this.lowerPipes.setVelocityX(-(this.pipeVelocity)); 
+            this.lowerPipes.setVelocityX(-(this.pipeVelocity));
             console.log(this.pipeVelocity);
+        }
+        
+        //console.log(this.isMoving);
+        //Moving the pipes up and down
+
+        if (this.isMoving){
+
+            let upOrDown = [-50, 50];
+            let direction = 0;
+            let fate = Phaser.Math.Between(0, 1);
+            direction = upOrDown[fate];
+
+            this.upperPipes.setVelocityY(direction);
+            this.lowerPipes.setVelocityY(direction);
         }
     }
 
@@ -147,7 +177,6 @@ class Main extends Phaser.Scene {
     //Constantly refreshes
     //These are technically the events that happen in the game
     update() {
-
         //Shooting the fireball if space is pressed
         this.inputKeys.forEach(key => {
             if (Phaser.Input.Keyboard.JustDown(key)) {
@@ -259,6 +288,9 @@ class Main extends Phaser.Scene {
             case 'Health':
                 this.healthHandler();
                 break;
+            case 'Moving':
+                this.movePipes();
+                break;
         }
     }
 
@@ -335,5 +367,17 @@ class Main extends Phaser.Scene {
             this.bird.PlayerInvincible = true;
             this.bird.setTexture('invincibleBird');
         }
+    }
+
+    movePipes(){
+        this.isMoving = true;
+        
+        //Resets the speed to normal
+        //setTimeout 'this.'' is not the same as Main 'this.'
+        //Therefore have to save it in a variable and use that
+        var that = this;
+        setTimeout(function () {
+            that.isMoving = false;
+        }, 15000);
     }
 }

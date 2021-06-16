@@ -46,11 +46,19 @@ class Pickups
 
     generatePickupType()
     {
+        // let pickupTypes = [
+        //     "Slow",
+        //     "Fast",
+        //     "Ammo",
+        //     "Health",
+        //     "Moving"];
+
         let pickupTypes = [
-            "Slow",
-            "Fast",
-            "Ammo",
-            "Health"];
+            "Moving",
+            "Moving",
+            "Moving",
+            "Moving",
+            "Moving"];
 
         let random = Phaser.Math.Between(0, pickupTypes.length - 1);
 
