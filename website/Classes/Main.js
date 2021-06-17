@@ -48,6 +48,7 @@ class Main extends Phaser.Scene {
         this.pipeVelocity = this.bird.playerSpeed;
         //If true pipes move
         this.isMoving = false;
+        this.isMovingUp = true;
 
         //Creating pickups
         this.pickups = new Pickups(this);
@@ -129,7 +130,8 @@ class Main extends Phaser.Scene {
                     this.updateScore(1);
                 }
             }
-            
+
+            this.isMovingUp = this.isMovingUp ? false : true;
     }
 
     //Places the pipes on the screen
@@ -145,13 +147,14 @@ class Main extends Phaser.Scene {
         
         //console.log(this.isMoving);
         //Moving the pipes up and down
-
-        if (this.isMoving){
-
-            let upOrDown = [-50, 50];
             let direction = 0;
-            let fate = Phaser.Math.Between(0, 1);
-            direction = upOrDown[fate];
+            if (this.isMoving){
+                console.log(this.isMovingUp);
+                if (this.isMovingUp){
+                    direction = -50;
+                }else{
+                    direction = 50;
+                }
 
             this.upperPipes.setVelocityY(direction);
             this.lowerPipes.setVelocityY(direction);
