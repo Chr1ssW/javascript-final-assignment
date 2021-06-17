@@ -8,7 +8,7 @@ class Main extends Phaser.Scene {
         super('PlayGame');
     }
 
-    //Loading the assets used in the game
+    // Loading the assets used in the game
     preload() {
         this.load.image('bird', 'resources/angry-bird.png');
         this.load.image('invincibleBird', 'resources/invincible-bird.png');
@@ -18,71 +18,75 @@ class Main extends Phaser.Scene {
         this.load.image('background', 'resources/background.png');
         this.load.image('ammo', 'resources/ammo.png');
         this.load.image('noAmmo', 'resources/noAmmo.png');
-        this.load.image('fireball', 'resources/fireball.png');       
+        this.load.image('fireball', 'resources/fireball.png');
     }
 
-    //Initializes the assets in the game
-    //And places them on the canvas
+    // Initializes the assets in the game
+    // And places them on the canvas
     create() {
 
+
+
         this.thisField;
-      
-        //Adding pipes
+
+        // Setting the background
+        this.add.image(160, 240, 'background');
+
+
+
+        // Adding pipes
         this.upperPipes = this.physics.add.group();
         this.lowerPipes = this.physics.add.group();
 
-        //Setting the background
-        this.add.image(160, 240, 'background');
-
-        //Mouse keys
+        // Mouse keys
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        //Keyboard keys
+        // Keyboard keys
         this.inputKeys = [];
         this.inputKeys.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE))
 
-        //Creating the bird
+        // Creating the bird
         this.bird = new Player(this, 80, game.config.height / 2, 'bird');
 
-        //Being updated needs to be preserved
+        // Being updated needs to be preserved
         this.pipeVelocity = this.bird.playerSpeed;
-        //If true pipes move
+        // If true pipes move
         this.isMoving = false;
         this.isMovingUp = true;
 
-        //Creating pickups
+        // Creating pickups
         this.pickups = new Pickups(this);
         this.pickups.setSpeed(this.bird.playerSpeed);
 
-        //Adding fireballs
+        // Adding fireballs
         this.fireballs = new FireballGroup(this);
 
-        //Add ammo icon
+        // Add ammo icon
         this.add.image(20, 60, 'noAmmo');
         this.ammo = this.add.image(20, 60, 'ammo');
 
-        //Hiding the ammo icon
-        this.ammo.visible = false;
-
-        //Event listener for click
+        // Event listener for click
         this.input.on('pointerdown', this.flap, this);
 
-        //Score counter
+        // Score counter
         this.score = 0;
         this.topScore = localStorage.getItem(gameOptions.localStorageName) == null ? 0 : localStorage.getItem(gameOptions.localStorageName);
         this.scoreText = this.add.text(10, 10, '');
         this.updateScore(this.score);
 
-        //Ammo counter
+        // Ammo counter
         this.ammoText = this.add.text(30, 70, '');
         this.updateAmmo();
 
-        //Spawn pipes
+        // Spawn pipes
         this.spawnPipes();
+
+
+        //this.gameOver.visible = false;
     }
 
-    //Timer that spawns the pipes
-    spawnPipes(){
+    // Timer that spawns the pipes
+    spawnPipes() {
         this.thisField = this.time.addEvent({
             delay: 1500,
             callback: this.generatePipes,
@@ -91,99 +95,97 @@ class Main extends Phaser.Scene {
         });
     }
 
-    //Generates the pipes
-    generatePipes(){
-            //Randomly picking the size of the gap
-            let gap = Phaser.Math.Between(90, 120);
+    // Generates the pipes
+    generatePipes() {
+        // Randomly picking the size of the gap
+        let gap = Phaser.Math.Between(90, 120);
 
-            //Selecting a random number between 1 and 6
-            //If it is 1 then the gap will be 0 and the player has to shoot
-            //Doesn't spawn if user has no ammo
-            let fate = Phaser.Math.Between(1, 10);
-            if (fate == 1 && this.bird.ammo > 0){
-                gap = 0;
+        // Selecting a random number between 1 and 6
+        // If it is 1 then the gap will be 0 and the player has to shoot
+        // Doesn't spawn if user has no ammo
+        let fate = Phaser.Math.Between(1, 10);
+        if (fate == 1 && this.bird.PlayerAmmo > 0) {
+            gap = 0;
+        }
+
+        // Minimum distance has to be at least 320
+        let distance = 320 + gap;
+
+        // Picking the hole position
+        // This is the middle of the gap
+        let pipeHolePosition = Phaser.Math.Between(130, 330);
+
+
+        let lowerY = pipeHolePosition + distance / 2;
+        let upperY = pipeHolePosition - distance / 2;
+
+        this.placePipe('upperPipe', upperY);
+        this.placePipe('bottomPipe', lowerY);
+
+        // Need to check both the get points if the user destroys one of them
+        var upperFirst = this.upperPipes.getFirstAlive();
+        var lowerFirst = this.lowerPipes.getFirstAlive();
+        if (upperFirst != null || lowerFirst != null) {
+            // If the user passes the pipes increase the score
+            // If the user shoots both pipes no score is given
+            if (upperFirst.x < this.bird.x || lowerFirst.x < this.bird) {
+                this.updateScore(1);
             }
+        }
 
-            //Minimum distance has to be at least 320
-            let distance = 320 + gap;
-
-            //Picking the hole position
-            //This is the middle of the gap
-            let pipeHolePosition = Phaser.Math.Between(130, 330);
-
-
-            let lowerY = pipeHolePosition + distance / 2;
-            let upperY = pipeHolePosition - distance / 2;
-
-            this.placePipe('upperPipe', upperY);
-            this.placePipe('bottomPipe', lowerY);
-
-            //Need to check both the get points if the user destroys one of them
-            var upperFirst = this.upperPipes.getFirstAlive();
-            var lowerFirst = this.lowerPipes.getFirstAlive();
-            if (upperFirst != null || lowerFirst != null)
-            {
-                //If the user passes the pipes increase the score
-                //If the user shoots both pipes no score is given
-                if (upperFirst.x < this.bird.x || lowerFirst.x < this.bird)
-                {
-                    this.updateScore(1);
-                }
-            }
-
-            this.isMovingUp = this.isMovingUp ? false : true;
+        this.isMovingUp = this.isMovingUp ? false : true;
     }
 
-    //Places the pipes on the screen
-    placePipe(skin, y){     
-        if (skin === 'upperPipe'){
+    // Places the pipes on the screen
+    placePipe(skin, y) {
+        if (skin === 'upperPipe') {
             this.upperPipes.create(500, y, skin);
-            this.upperPipes.setVelocityX(- (this.pipeVelocity));
-        }else{
+            this.upperPipes.setVelocityX(-(this.pipeVelocity));
+        } else {
             this.lowerPipes.create(500, y, skin);
             this.lowerPipes.setVelocityX(-(this.pipeVelocity));
             console.log(this.pipeVelocity);
         }
-        
-        //console.log(this.isMoving);
-        //Moving the pipes up and down
-            let direction = 0;
-            if (this.isMoving){
-                console.log(this.isMovingUp);
-                if (this.isMovingUp){
-                    direction = -50;
-                }else{
-                    direction = 50;
-                }
+
+        // console.log(this.isMoving);
+        // Moving the pipes up and down
+        let direction = 0;
+        if (this.isMoving) {
+            console.log(this.isMovingUp);
+            if (this.isMovingUp) {
+                direction = -50;
+            } else {
+                direction = 50;
+            }
 
             this.upperPipes.setVelocityY(direction);
             this.lowerPipes.setVelocityY(direction);
         }
     }
 
-    //Can't delete it for now have to figure out why
+    // Can't delete it for now have to figure out why
     flap() {
         this.bird.ascend();
     }
 
-    //Updates the textfield with the score
+    // Updates the textfield with the score
     updateScore(inc) {
         this.score += inc;
         this.scoreText.text = 'Score: ' + this.score + '\nBest: ' + this.topScore;
     }
 
-    //Updates the textfield with the ammo
+    // Updates the textfield with the ammo
     updateAmmo() {
         this.ammoText.text = this.bird.PlayerAmmo;
     }
 
-    //Constantly refreshes
-    //These are technically the events that happen in the game
+    // Constantly refreshes
+    // These are technically the events that happen in the game
     update() {
-        //Shooting the fireball if space is pressed
+        // Shooting the fireball if space is pressed
         this.inputKeys.forEach(key => {
             if (Phaser.Input.Keyboard.JustDown(key)) {
-                //Only shoot if the player has ammo
+                // Only shoot if the player has ammo
                 if (this.bird.PlayerAmmo > 0) {
                     this.fireballs.shootFireball(this.bird.x, this.bird.y);
                     this.bird.PlayerAmmo--;
@@ -197,74 +199,123 @@ class Main extends Phaser.Scene {
             }
         });
 
-        //Collider for bird and pipes
+        // Collider for bird and pipes
         this.physics.world.overlap(this.bird, this.upperPipes, function () {
             this.die();
         }, null, this);
-        //Collider for bird and pipes
+        // Collider for bird and pipes
         this.physics.world.overlap(this.bird, this.lowerPipes, function () {
             this.die();
         }, null, this);
 
-        //Collider for bird pickups
+        // Collider for bird pickups
         this.physics.world.overlap(this.bird, this.pickups.pickupGroup, this.pickupObjects, null, this);
 
-        //Collider for fireballs and pipes
+        // Collider for pickups and pipes
+        this.physics.world.overlap(this.upperPipes, this.pickups.pickupGroup, this.hidePickup, null, this);
+        this.physics.world.overlap(this.lowerPipes, this.pickups.pickupGroup, this.hidePickup, null, this);
+
+        // Collider for fireballs and pipes
         this.physics.world.overlap(this.fireballs, this.upperPipes, this.shootPipes, null, this);
-        
-        //Collider for fireballs and pipes
+
+        // Collider for fireballs and pipes
         this.physics.world.overlap(this.fireballs, this.lowerPipes, this.shootPipes, null, this);
 
-        //If the player leaves the screen the bird dies
+        // If the player leaves the screen the bird dies
         if (this.bird.y > game.config.height || this.bird.y < 0) {
             this.die();
         }
-        
-        //Iterate through the pickups to check if they are out of the screen
+
+        // Iterate through the pickups to check if they are out of the screen
         this.pickups.pickupGroup.getChildren().forEach(function (pickup) {
             this.pickups.addPickup(pickup);
 
             if (pickup.getBounds().right < 0) {
 
-                //If pickup is out of the screen render a new one
+                // If pickup is out of the screen render a new one
                 this.pickups.renderPickups(250);
             }
         }, this)
     }
 
-    //Picking up the mistery boxes
+    // Picking up the mistery boxes
     pickupObjects(bird, pickup) {
-        //Generate a random pickup type and pass it to the handler
+        // Generate a random pickup type and pass it to the handler
         this.pickupHandler(this.pickups.generatePickupType());
 
-        //Make the box disappear
+        // Make the box disappear
         pickup.disableBody(true, true);
 
-        //Randomly spawn another pickup
+        var that = this;
+
+        // Randomly spawn another pickup
+        this.pickups.pickupGroup.children.iterate(function (child) {
+            child.enableBody(true, 350 * Phaser.Math.Between(1, 3), Phaser.Math.Between(20, game.config.height - 20), true, true);
+            child.setVelocityX(-(that.bird.playerSpeed));
+        });
+    }
+
+    // If the pickup spawns in pipes hide it
+    hidePickup(object, pickup){
+        // Make the box disappear
+        pickup.disableBody(true, true);
+
+        var that = this;
+
+        // Randomly spawn another pickup
         this.pickups.pickupGroup.children.iterate(function (child) {
             child.enableBody(true, 350 * Phaser.Math.Between(2, 4), Phaser.Math.Between(20, game.config.height - 20), true, true);
-            child.setVelocityX(-(125));
+            child.setVelocityX(-(that.bird.playerSpeed));
         });
+    
     }
 
     shootPipes(ammo, pipe) {
         console.log('hitPipe');
-        pipe.destroy();   
-        ammo.disableBody(true, true);    
-        ammo.enableBody(true, 1500,1500, true, true);
+        pipe.destroy();
+        ammo.disableBody(true, true);
+        ammo.enableBody(true, 1500, 1500, true, true);   
     }
-    //End and restart the game
+
+    // End and restart the game
     die() {
 
-        //If the player has no life points left the game is over
+        // If the player has no life points left the game is over
         if (!this.bird.PlayerInvincible) {
             localStorage.setItem(gameOptions.localStorageName, Math.max(this.score, this.topScore));
-            this.scene.start('PlayGame');
+
+            // Game over text
+            this.gameOver = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, "GAME OVER", {
+                fontSize: '35px'
+            });
+            this.gameOver.setOrigin(0.5);
+
+            this.restarting = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 50, "Restarting in...");
+            this.restarting.setOrigin(0.5);
+
+            // Pausing the game
+            this.scene.pause();
+
+            // Countdown value
+            let counter = 3;
+
+            var counterInterval = setInterval(() => {
+                this.restarting.text = counter;
+                counter--;
+            }, 1000);
+
+            // Restart in 3 seconds
+            var that = this;
+            setTimeout(function () {
+                that.scene.start('PlayGame');
+                clearInterval(counterInterval);
+            }, 3500);
+
         }
-        //If the player has one lifepoint it will be taken once he's out of the wall
+        // If the player has one lifepoint it will be taken once he's out of the wall
         else {
-            //Little cheating here
-            //Could not find an "overlap-en" event therefore resetting the skin is on a timer
+            // Little cheating here
+            // Could not find an "overlap-en" event therefore resetting the skin is on a timer
             var that = this;
             setTimeout(function () {
                 that.bird.PlayerInvincible = false;
@@ -273,8 +324,16 @@ class Main extends Phaser.Scene {
         }
     }
 
-    //Calls the respective function based on the randomly generated pickup type
+    // Calls the respective function based on the randomly generated pickup type
     pickupHandler(pickupType) {
+
+        let typeText = this.add.text(this.bird.x, this.bird.y - 75, pickupType).setInteractive();
+        typeText.setOrigin(0.5);
+
+        setTimeout(function () {
+            typeText.visible = false;
+        }, 1000)
+
         switch (pickupType) {
             case 'Slow':
                 this.slowGame();
@@ -297,45 +356,45 @@ class Main extends Phaser.Scene {
         }
     }
 
-    //Slows the game
+    // Slows the game
     slowGame() {
-        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) + 45);
-        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) + 45);
+        this.upperPipes.setVelocityX(-(this.bird.playerSpeed) + 45);
+        this.lowerPipes.setVelocityX(-(this.bird.playerSpeed) + 45);
         this.pickups.setSpeed((this.bird.playerSpeed) - 45);
 
         this.pipeVelocity = (this.bird.playerSpeed) - 45;
-        
-        //Resets the speed to normal
-        //setTimeout 'this.'' is not the same as Main 'this.'
-        //Therefore have to save it in a variable and use that
+
+        // Resets the speed to normal
+        // setTimeout 'this.'' is not the same as Main 'this.'
+        // Therefore have to save it in a variable and use that
         var that = this;
         setTimeout(function () {
-            that.upperPipes.setVelocityX(- (that.bird.playerSpeed));
-            that.lowerPipes.setVelocityX(- (that.bird.playerSpeed));
+            that.upperPipes.setVelocityX(-(that.bird.playerSpeed));
+            that.lowerPipes.setVelocityX(-(that.bird.playerSpeed));
             that.pipeVelocity = (that.bird.playerSpeed);
 
             that.pickups.setSpeed(that.bird.playerSpeed);
         }, 6000);
     }
 
-    //Fastens the game
+    // Fastens the game
     fastenGame() {
         console.log("hello");
-        this.upperPipes.setVelocityX(- (this.bird.playerSpeed) - 100);
-        this.lowerPipes.setVelocityX(- (this.bird.playerSpeed) - 100);
+        this.upperPipes.setVelocityX(-(this.bird.playerSpeed) - 100);
+        this.lowerPipes.setVelocityX(-(this.bird.playerSpeed) - 100);
         this.pickups.setSpeed((this.bird.playerSpeed) + 100);
 
         this.pipeVelocity = (this.bird.playerSpeed) + 100;
 
         var that = this;
 
-        //Resets the speed to normal
-        //setTimeout 'this.'' is not the same as Main 'this.'
-        //Therefore have to save it in a variable and use that
+        // Resets the speed to normal
+        // setTimeout 'this.'' is not the same as Main 'this.'
+        // Therefore have to save it in a variable and use that
         var that = this;
         setTimeout(function () {
-            that.upperPipes.setVelocityX(- (that.bird.playerSpeed));
-            that.lowerPipes.setVelocityX(- (that.bird.playerSpeed));
+            that.upperPipes.setVelocityX(-(that.bird.playerSpeed));
+            that.lowerPipes.setVelocityX(-(that.bird.playerSpeed));
             that.pipeVelocity = (that.bird.playerSpeed);
 
             that.pickups.setSpeed(that.bird.playerSpeed);
@@ -350,21 +409,21 @@ class Main extends Phaser.Scene {
         this.updateAmmo();
     }
 
-    //Mirror game
-    //Not yet functional
+    // Mirror game
+    // Not yet functional
     mirrorGame() {
-        //this.pipes.setSpeed(-(this.bird.playerSpeed));
+        // this.pipes.setSpeed(-(this.bird.playerSpeed));
 
-        //Resets the speed to normal
-        //setTimeout 'this.'' is not the same as Main 'this.'
-        //Therefore have to save it in a variable and use that
+        // Resets the speed to normal
+        // setTimeout 'this.'' is not the same as Main 'this.'
+        // Therefore have to save it in a variable and use that
         var that = this;
         setTimeout(function () {
             that.pipes.setSpeed(that.bird.playerSpeed);
         }, 6000);
     }
 
-    //Sets the health value
+    // Sets the health value
     healthHandler() {
         if (!this.bird.PlayerInvincible) {
             this.bird.PlayerInvincible = true;
@@ -372,12 +431,14 @@ class Main extends Phaser.Scene {
         }
     }
 
-    movePipes(){
+    // Sets the isMoving to true
+    // When pipes spawn they will have an Y velocity
+    movePipes() {
         this.isMoving = true;
-        
-        //Resets the speed to normal
-        //setTimeout 'this.'' is not the same as Main 'this.'
-        //Therefore have to save it in a variable and use that
+
+        // Resets the speed to normal
+        // setTimeout 'this.'' is not the same as Main 'this.'
+        // Therefore have to save it in a variable and use that
         var that = this;
         setTimeout(function () {
             that.isMoving = false;

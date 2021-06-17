@@ -13,7 +13,7 @@ class Player extends Phaser.Physics.Arcade.Sprite
     #_playerInvincible = false;
 
     //player ammo
-    #_playerAmmo = 1000;
+    #_playerAmmo = 5;
 
     //Creates a new player object and places it on the screen
     //game - the scene where the object should appear
