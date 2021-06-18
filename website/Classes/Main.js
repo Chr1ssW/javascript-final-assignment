@@ -19,15 +19,31 @@ class Main extends Phaser.Scene {
         this.load.image('ammo', 'resources/ammo.png');
         this.load.image('noAmmo', 'resources/noAmmo.png');
         this.load.image('fireball', 'resources/fireball.png');
+        
+        // Loading audio
+        this.load.audio('fireball', 'resources/audio/fireball.mp3');
+        this.load.audio('dieAudio', 'resources/audio/dieAudio.mp3');
+        this.load.audio('explosion', 'resources/audio/explosion.mp3');
+        this.load.audio('flap', 'resources/audio/flap.mp3');
+        this.load.audio('pickupSound', 'resources/audio/pickup.mp3');
     }
 
     // Initializes the assets in the game
     // And places them on the canvas
     create() {
 
+        // Creating sound variables
+        this.fireball = this.sound.add('fireball');
+        this.dieAudio = this.sound.add('dieAudio');
+        this.explosion = this.sound.add('explosion');
+        this.flapSound = this.sound.add('flap');
+        this.pickupSound = this.sound.add('pickupSound');
+        this.dieAudio.volume = 0.2;
+        this.explosion.volume = 0.3;
+        this.flapSound.volume = 0.3;
+        this.pickupSound.volume = 0.3;        
 
-
-        this.thisField;
+        this.pipeGenerateEvent;
 
         // Setting the background
         this.add.image(160, 240, 'background');
@@ -87,7 +103,7 @@ class Main extends Phaser.Scene {
 
     // Timer that spawns the pipes
     spawnPipes() {
-        this.thisField = this.time.addEvent({
+        this.pipeGenerateEvent = this.time.addEvent({
             delay: 1500,
             callback: this.generatePipes,
             callbackScope: this,
@@ -98,7 +114,7 @@ class Main extends Phaser.Scene {
     // Generates the pipes
     generatePipes() {
         // Randomly picking the size of the gap
-        let gap = Phaser.Math.Between(90, 120);
+        let gap = Phaser.Math.Between(100, 120);
 
         // Selecting a random number between 1 and 6
         // If it is 1 then the gap will be 0 and the player has to shoot
@@ -166,6 +182,7 @@ class Main extends Phaser.Scene {
     // Can't delete it for now have to figure out why
     flap() {
         this.bird.ascend();
+        this.flapSound.play();
     }
 
     // Updates the textfield with the score
@@ -188,6 +205,7 @@ class Main extends Phaser.Scene {
                 // Only shoot if the player has ammo
                 if (this.bird.PlayerAmmo > 0) {
                     this.fireballs.shootFireball(this.bird.x, this.bird.y);
+                    this.fireball.play();
                     this.bird.PlayerAmmo--;
 
                     if (this.bird.PlayerAmmo == 0) {
@@ -199,14 +217,14 @@ class Main extends Phaser.Scene {
             }
         });
 
-        // Collider for bird and pipes
-        this.physics.world.overlap(this.bird, this.upperPipes, function () {
-            this.die();
-        }, null, this);
-        // Collider for bird and pipes
-        this.physics.world.overlap(this.bird, this.lowerPipes, function () {
-            this.die();
-        }, null, this);
+        // // Collider for bird and pipes
+        // this.physics.world.overlap(this.bird, this.upperPipes, function () {
+        //     this.die();
+        // }, null, this);
+        // // Collider for bird and pipes
+        // this.physics.world.overlap(this.bird, this.lowerPipes, function () {
+        //     this.die();
+        // }, null, this);
 
         // Collider for bird pickups
         this.physics.world.overlap(this.bird, this.pickups.pickupGroup, this.pickupObjects, null, this);
@@ -243,6 +261,9 @@ class Main extends Phaser.Scene {
         // Generate a random pickup type and pass it to the handler
         this.pickupHandler(this.pickups.generatePickupType());
 
+        // Play the sound
+        this.pickupSound.play();
+
         // Make the box disappear
         pickup.disableBody(true, true);
 
@@ -271,10 +292,15 @@ class Main extends Phaser.Scene {
     }
 
     shootPipes(ammo, pipe) {
-        console.log('hitPipe');
+        // Shake the screen
+        this.cameras.main.shake(300, 0.01);
+        // Play the sound effect        
+        this.explosion.play();
+
+        // Handling sprite bodies
         pipe.destroy();
         ammo.disableBody(true, true);
-        ammo.enableBody(true, 1500, 1500, true, true);   
+        ammo.enableBody(true, 1500, 1500, true, true);
     }
 
     // End and restart the game
@@ -295,6 +321,7 @@ class Main extends Phaser.Scene {
 
             // Pausing the game
             this.scene.pause();
+            this.dieAudio.play();
 
             // Countdown value
             let counter = 3;
@@ -309,7 +336,7 @@ class Main extends Phaser.Scene {
             setTimeout(function () {
                 that.scene.start('PlayGame');
                 clearInterval(counterInterval);
-            }, 3500);
+            }, 4000);
 
         }
         // If the player has one lifepoint it will be taken once he's out of the wall

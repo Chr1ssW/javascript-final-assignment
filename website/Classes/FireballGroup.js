@@ -8,8 +8,8 @@ class FireballGroup extends Phaser.Physics.Arcade.Group {
             active: false,
             visible: false,
             setXY: {
-                x: -150,
-                y: -150
+                x: -1500,
+                y: -1500
             },
             key: 'fireball'
         })
