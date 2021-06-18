@@ -1,7 +1,8 @@
 class FireballGroup extends Phaser.Physics.Arcade.Group {
-    constructor(scene){
+    constructor(scene) {
         super(scene.physics.world, scene);
 
+        // Create multiple fireball objects
         this.createMultiple({
             classType: Fireball,
             frameQuantity: 10,
@@ -15,10 +16,11 @@ class FireballGroup extends Phaser.Physics.Arcade.Group {
         })
     }
 
-    shootFireball(x, y){
+    // Calls the shoot method for the first ammo in the pool
+    shootFireball(x, y, goingLeft) {
         const fireball = this.getFirstDead(false);
         if (fireball) {
-            fireball.fire(x, y);
+            fireball.fire(x, y, goingLeft);
         }
     }
 }

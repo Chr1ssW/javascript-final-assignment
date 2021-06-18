@@ -3,13 +3,21 @@ class Fireball extends Phaser.Physics.Arcade.Sprite{
         super(scene, x, y, 'fireball');
     }
 
-    fire(x, y){
+    // Fires the actual bullet
+    fire(x, y, goingLeft){
         this.body.reset(x, y);
 
         this.setActive(true);
         this.setVisible(true);
 
-        this.setVelocityX(300);
+        // Decides which way to shoot
+        if (goingLeft){
+            this.setVelocityX(-300);
+        }else{
+            this.setVelocityX(300);
+        }
+
+        
     }
 
     preUpdate(time, delta){

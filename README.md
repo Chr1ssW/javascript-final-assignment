@@ -40,6 +40,8 @@ The mistery boxes can include the following:
 
 To set up the game the user needs a local server. This is preferably `Xampp`, but it should work with any other localhost. The user must place the files on the local server and open the `index.html` through the browser.
 
+The game is best played with headphones.
+
 ## Controls
 
 The game has only two controls:
