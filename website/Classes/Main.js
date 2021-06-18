@@ -217,6 +217,9 @@ class Main extends Phaser.Scene {
             // Otherwise no pipes would ever spawn
             if ((upperFirst.x < - 40 && !this.goingLeft) || ((upperFirst.x > game.config.width + 40) && this.goingLeft)) {
                 upperFirst.destroy();
+            }
+
+            if ((lowerFirst.x < - 40 && !this.goingLeft) || ((lowerFirst.x > game.config.width + 40) && this.goingLeft)) {
                 lowerFirst.destroy();
             }
         }
